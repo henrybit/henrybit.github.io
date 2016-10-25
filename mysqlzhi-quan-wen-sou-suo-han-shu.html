@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+        <meta charset="utf-8" />
+        <title>Mysql之全文搜索函数</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">FFW Blog </a></h1>
+                <nav><ul>
+                    <li class="active"><a href="/category/misc.html">misc</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/mysqlzhi-quan-wen-sou-suo-han-shu.html" rel="bookmark"
+           title="Permalink to Mysql之全文搜索函数">Mysql之全文搜索函数</a></h1>
+    </header>
+
+    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-25T00:00:00+08:00">
+                Published: 二 25 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->      <h1>Mysql之全文搜索函数(TODO)</h1>
+<p>MATCH (col1,col2,...) AGAINST (expr [search_modifier])</p>
+<h2>简介</h2>
+<div class="highlight"><pre>search_modifier:
+  {
+       IN NATURAL LANGUAGE MODE
+     | IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION
+     | IN BOOLEAN MODE
+     | WITH QUERY EXPANSION
+  }
+</pre></div>
+
+
+<p>Mysql支持全文索引和检索，有如下几个特征：</p>
+<ul>
+<li>全文索引类型是FULLTEXT</li>
+<li>全文索引只能被用在MyISAM引擎的表中（如果Mysql版本&gt;=5.6，全文索引也可以被用在InnoDB引擎的表中）</li>
+<li>全文索引只能被创建在CHAR、VARCHAR、TEXT类型的字段上</li>
+<li>全文索引可以在建表的时候设定，也可以在建表后进行更改</li>
+<li>如果一个表数据量很大，那么增加了全文索引，将会导致其加载数据变慢。</li>
+</ul>
+<h2>场景</h2>
+<p>全文检索使用MATCH(col_name)AGAINST(...)表达格式。MATCH括号中使用逗号分隔罗列需要被检索的字段列表。AGAINST()括号中是需要被检索的内容。</p>
+<p>有三种全文检索查询方式:</p>
+<ol>
+<li>自然语言检索(A natural language search)：会将检索串进行自然语言分词，拆解成一个个词组，并且会使用停词列表来处理。通常情况，如果一个词出现在超过50%数据里，那么这个词将会被认为是通用词，不启动匹配。（IN NATURAL LANGUAGE MODE）</li>
+<li>真值检索(A boolean search )：真值检索使用特殊的检索
+语言--AGAINST(string IN BOOLEAN MODE)，当然也能有其他很多种操作方式，比如包含或不包含，大于或者小于。（IN BOOLEAN MODE）</li>
+<li>查询表达式检索(A query expansion search)：这是一种修改版的自然语言检索方式，检索字符串时，第一次会使用自然语言检索的结果，然后将检索结果最相关行的单词添加到搜索字符中，再次检索，返回第二次检索结果。（The IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION 或 WITH QUERY EXPANSION）</li>
+</ol>
+<h2>附录</h2>
+<p>1.【Full-Text Search Functions】https://dev.mysql.com/doc/refman/5.5/en/fulltext-search.html</p>
+<p>2.【Natural Language Full-Text Searches】https://dev.mysql.com/doc/refman/5.5/en/fulltext-natural-language.html</p>
+<p>3.【Boolean Full-Text Searches】https://dev.mysql.com/doc/refman/5.5/en/fulltext-boolean.html</p>
+<p>4.【Full-Text Searches with Query Expansion】https://dev.mysql.com/doc/refman/5.5/en/fulltext-query-expansion.html</p>
+    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>

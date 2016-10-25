@@ -2,7 +2,7 @@
 <html lang="cn">
 <head>
         <meta charset="utf-8" />
-        <title>Docker安装Centos</title>
+        <title>Centos安装Cloudera CDH（YUM方式）</title>
         <link rel="stylesheet" href="/theme/css/main.css" />
 
         <!--[if IE]>
@@ -21,8 +21,8 @@
   <article>
     <header>
       <h1 class="entry-title">
-        <a href="/dockeran-zhuang-centos.html" rel="bookmark"
-           title="Permalink to Docker安装Centos">Docker安装Centos</a></h1>
+        <a href="/centosan-zhuang-cloudera-cdhyumfang-shi.html" rel="bookmark"
+           title="Permalink to Centos安装Cloudera CDH（YUM方式）">Centos安装Cloudera CDH（YUM方式）</a></h1>
     </header>
 
     <div class="entry-content">
@@ -36,62 +36,63 @@
         </address>
 <p>In <a href="/category/misc.html">misc</a>.</p>
 
-</footer><!-- /.post-info -->      <h1>Docker安装Centos</h1>
-<h2>设置Docker国内镜像</h2>
-<p>镜像源地址可以通过阿里云申请一个：https://dev.aliyun.com/search.html ，也可以去网易镜像库寻找资源https://c.163.com/hub#/m/home/ 。</p>
-<h2>安装Centos</h2>
-<div class="highlight"><pre>docker pull centos
+</footer><!-- /.post-info -->      <h1>Centos安装Cloudera CDH（YUM方式）</h1>
+<h2>简介</h2>
+<p>Cloudera提供使用Yum方式或者下载RPM包进行安装，在接下来的环节，将采用Yum方式安装Cloudera。</p>
+<h2>编辑Yum的Repo</h2>
+<p>Cloudera的Yum安装地址：https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo?_ga=1.50190628.383672037.1471754216 。</p>
+<p>在/etc/yum.repos.d目录下新建文件“cloudera-cdh5.repo”</p>
+<div class="highlight"><pre>[root@e38f507299b0 yum.repos.d]#vi /etc/yum.repos.d/cloudera-cdh5.repo
+[cloudera-cdh5]
+# Packages for Cloudera&#39;s Distribution for Hadoop, Version 5, on RedHat or CentOS 6 x86_64
+name=Cloudera&#39;s Distribution for Hadoop, Version 5
+baseurl=https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5/
+gpgkey =https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera    
+gpgcheck = 1
 </pre></div>
 
 
-<h2>启动Centos</h2>
-<div class="highlight"><pre>docker run -d -i -t centos /bin/bash
+<h2>安装步骤（安装CDH5的YARN版本）</h2>
+<p>1.安装Resource Manager host</p>
+<div class="highlight"><pre>sudo yum clean all
+sudo yum install hadoop-yarn-resourcemanager
 </pre></div>
 
 
-<h2>进入Centos</h2>
-<p>查看运行后的容器ID</p>
-<div class="highlight"><pre>docker ps
+<p>2.安装NameNode</p>
+<div class="highlight"><pre>sudo yum clean all
+sudo yum install hadoop-hdfs-namenode
 </pre></div>
 
 
-<pre>
-CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-e38f507299b0        centos              "/bin/bash"         33 minutes ago      Up 1 seconds                            naughty_curie
-</pre>
-
-<p>找到容器ID，通过命令</p>
-<div class="highlight"><pre>docker attach e38f507299b0
+<p>3.安装Secondary NameNode</p>
+<div class="highlight"><pre>sudo yum clean all
+sudo yum install hadoop-hdfs-secondarynamenode
 </pre></div>
 
 
-<p>进入容器中，这就是centos的一个系统在docker中运行</p>
-<pre>
-[root@e38f507299b0 /]# ifconfig
-bash: ifconfig: command not found
-</pre>
-
-<h2>安装Centos中ifconfig命令</h2>
-<p>竟然没有ifconfig命令，接着使用你会发现ssh也没有，还有我常用的命令which，来吧，我们开始安装这些组件；这已经是一个centos系统了，那么就让我们用yum开始安装吧。</p>
-<div class="highlight"><pre>yum install net-tools.x86_64
+<p>4.安装DataNode/Yarn/MapReduce（所有节点需要执行，除了安装了Resource Manager的节点）</p>
+<div class="highlight"><pre>sudo yum clean all
+sudo yum install hadoop-yarn-nodemanager hadoop-hdfs-datanode hadoop-mapreduce
 </pre></div>
 
 
-<h2>安装Which命令</h2>
-<div class="highlight"><pre>yum install which
+<p>5.安装Proxy Server/History Server（选取集群中的一个节点即可）</p>
+<div class="highlight"><pre>sudo yum clean all
+sudo yum install hadoop-mapreduce-historyserver hadoop-yarn-proxyserver
 </pre></div>
 
 
-<h2>安装SSH</h2>
-<p>服务端SSH服务</p>
-<div class="highlight"><pre>yum install openssh-server  ##安装SSH服务
-sshd -D &amp;  ##启动SSH服务
+<p>6.安装Hadoop客户端</p>
+<div class="highlight"><pre>sudo yum clean all
+sudo yum install hadoop-client
 </pre></div>
 
 
-<p>SSH客户端工具</p>
-<div class="highlight"><pre>yum install openssh-clients
-</pre></div>
+<h2>参考来源</h2>
+<p>1.【Cloudera CDH下载】http://www.cloudera.com/downloads/cdh/5-8-2.html
+2.【Cloudera企业版文档】http://www.cloudera.com/content/dam/www/static/documents/datasheets/cloudera-enterprise-datasheet.pdf
+3.【Cloudera安装文档】http://www.cloudera.com/documentation/enterprise/latest/topics/cdh_ig_cdh5_install.html#topic_4_4_1__p_32</p>
     </div><!-- /.entry-content -->
 
   </article>

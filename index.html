@@ -1,29 +1,276 @@
 <!DOCTYPE html>
 <html lang="cn">
 <head>
-        <title>FFW Blog</title>
         <meta charset="utf-8" />
+        <title>FFW Blog</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
 </head>
 
 <body id="index" class="home">
         <header id="banner" class="body">
-                <h1><a href="/">FFW Blog <strong></strong></a></h1>
+                <h1><a href="/">FFW Blog </a></h1>
+                <nav><ul>
+                    <li><a href="/category/misc.html">misc</a></li>
+                </ul></nav>
         </header><!-- /#banner -->
-        <nav id="menu"><ul>
-        </ul></nav><!-- /#menu -->
-<section id="content">
-<h2>All articles</h2>
 
-<ol id="post-list">
-        <li><article class="hentry">
-                <header> <h2 class="entry-title"><a href="/dockeran-zhuang-centos.html" rel="bookmark" title="Permalink to Docker安装Centos">Docker安装Centos</a></h2> </header>
-                <footer class="post-info">
-                    <abbr class="published" title="2016-10-25T00:00:00+08:00"> 二 25 十月 2016 </abbr>
-                    <address class="vcard author">By
-                        <a class="url fn" href="/author/henrybit.html">henrybit</a>
-                    </address>
-                </footer><!-- /.post-info -->
-                <div class="entry-content"> <h1>Docker安装Centos</h1>
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="/centosan-zhuang-caravel.html">Centos安装caravel</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2016-10-25T00:00:00+08:00">
+                Published: 二 25 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info --><h1>Centos安装caravel</h1>
+<h2>简介</h2>
+<p>caravel要求python2.7以上，推荐使用python3.4+的版本，所以如果是python2.6，那么请先升级python吧。</p>
+<h2>Python2.6升级到2.7</h2>
+<h3>1.下载安装Python2.7</h3>
+<div class="highlight"><pre>wget http://python.org/ftp/python/2.7.3/Python-2.7.3.tar.bz2
+tar -jxvf Python-2.7.3.tar.bz2 
+cd Python-2.7.3
+./configure  
+make all             
+make install  
+make clean  
+make distclean 
+</pre></div>
+
+
+<h3>2.建立软链接，修改系统默认Python指向</h3>
+<div class="highlight"><pre>mv /usr/bin/python /usr/bin/python2.6.6  
+ln -s /usr/local/bin/python2.7 /usr/bin/python  
+</pre></div>
+
+
+<h3>3.修改Yum中的Python，保证Yum正常运行</h3>
+<p>由于系统默认的Python变为2.7，Yum对此不兼容，导致Yum无法使用，这时候我们需要进行如下步骤，确保Yum的正常使用。</p>
+<div class="highlight"><pre>vi /usr/bin/yum
+</pre></div>
+
+
+<p>打开yum的运行脚本，将会看见头部处有</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="ch">#!/usr/bin/python</span>
+</pre></div>
+</td></tr></table>
+
+<p>改成</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre>#!/usr/bin/python2.6.6
+</pre></div>
+</td></tr></table>
+
+<p>ok，试试Yum是否成功。</p>
+<h2>安装系统依赖环境</h2>
+<div class="highlight"><pre>sudo yum upgrade python-setuptools
+sudo yum install gcc libffi-devel python-devel python-pip python-wheel openssl-devel libsasl2-devel openldap-devel
+</pre></div>
+
+
+<h2>安装Python环境（Python环境已齐全，可以略过此步骤）</h2>
+<p>需要Python环境：setup工具、pip工具、virtualevn组件.</p>
+<h3>1.安装setup工具</h3>
+<div class="highlight"><pre>wget https://bootstrap.pypa.io/ez_setup.py -O - | python
+</pre></div>
+
+
+<h3>2.安装pip工具</h3>
+<div class="highlight"><pre>wget &quot;https://pypi.python.org/packages/source/p/pip/pip-1.5.4.tar.gz#md5=834b2904f92d46aaa333267fb1c922bb&quot; --no-check-certificate
+tar -xzvf pip-1.5.4.tar.gz
+cd pip-1.5.4
+python setup.py install
+</pre></div>
+
+
+<h3>3.安装Python virtualenv</h3>
+<div class="highlight"><pre>pip install virtualenv
+</pre></div>
+
+
+<h3>4.使用阿里pip源（重要）</h3>
+<p>镜像源的好处你知道，呵呵，不用你试试看。</p>
+<p>各种系统pip配置文件路径
+<pre>
+1.On Unix the default configuration file is: $HOME/.config/pip/pip.conf which respects the XDG_CONFIG_HOME environment variable.
+2.On Mac OS X the configuration file is $HOME/Library/Application Support/pip/pip.conf.
+3.On Windows the configuration file is %APPDATA%\pip\pip.ini.
+</pre></p>
+<p>centos在~/.pip/pip.conf文件中添加或修改</p>
+<div class="highlight"><pre><span class="k">[global]</span>
+<span class="na">index-url</span> <span class="o">=</span> <span class="s">http://mirrors.aliyun.com/pypi/simple/</span>
+
+<span class="k">[install]</span>
+<span class="na">trusted-host</span><span class="o">=</span><span class="s">mirrors.aliyun.com</span>
+</pre></div>
+
+
+<h2>安装caravel</h2>
+<div class="highlight"><pre># Install caravel
+pip install caravel
+
+# Create an admin user
+fabmanager create-admin --app caravel
+
+# Initialize the database
+caravel db upgrade
+
+# Load some data to play with
+caravel load_examples
+
+# Create default roles and permissions
+caravel init
+
+# Start the web server on port 8088
+caravel runserver -p 8088
+</pre></div>
+
+
+<h2>参考资源</h2>
+<p>1.【python setup工具】https://pypi.python.org/pypi/setuptools</p>
+<p>2.【pip安装】http://www.ttlsa.com/python/how-to-install-and-use-pip-ttlsa/</p>
+<p>3.【caravel安装】http://airbnb.io/caravel/installation.html</p>
+<p>4.【pip阿里源】http://mirrors.aliyun.com/help/pypi</p>
+<p>5.【pip mac配置】https://pip.pypa.io/en/stable/user_guide/#configuration</p>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/mysql-suo-yin-yu-cun-chu-yin-qing.html" rel="bookmark"
+                           title="Permalink to MySQL-索引与存储引擎">MySQL-索引与存储引擎</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-25T00:00:00+08:00">
+                Published: 二 25 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>MySQL-索引与存储引擎</h1>
+<h2>索引简介</h2>
+<p>每张表对索引的大小和数量上都是有一定的限制，不同的存储引擎(Myisam，Innodb）都是不一样的，但有一个共性是支持至少16个索引，总的索引长度256字节。</p>
+<h3>前缀索引(Prefix Indexes)</h3>
+<p>当你设置了一个字段为TEXT或者BLOB的类型时，怎么对这个对这个字段做索引呢？要知道这两种类型存储的数据是极大的，要是允许创建所以，你的索引文件就要爆炸了；当然当你尝试去在这上面建立索引时，Mysql是会给你报错了，提示你不允许在它们上面建立索引。这时候你可以使用前缀索引，如字面意思，就是提取某个字段的前缀的一部分串来建立索引，格式：col_name(N)-N指代前缀的长度。
+以下是范例：</p>
+<div class="highlight"><pre>CREATE TABLE test (blob_col BLOB, INDEX(blob_col(10)));
+</pre></div>
+
+
+<p>注意：前缀索引是可以达到1000字节长度，当然如果是Innodb，那么它只支持767字节，除非你使用innodb_large_prefix来设置。</p>
+<p>还需要额外注意的是，当前缀索引建立在非二进制类型上(CHAR, VARCHAR, TEXT)，那么该索引的长度限制是以字符(character)来衡量的；建立在二进制类型上 ...</p>
+                <a class="readmore" href="/mysql-suo-yin-yu-cun-chu-yin-qing.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/mysqlzhi-quan-wen-sou-suo-han-shu.html" rel="bookmark"
+                           title="Permalink to Mysql之全文搜索函数">Mysql之全文搜索函数</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-25T00:00:00+08:00">
+                Published: 二 25 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>Mysql之全文搜索函数(TODO)</h1>
+<p>MATCH (col1,col2,...) AGAINST (expr [search_modifier])</p>
+<h2>简介</h2>
+<div class="highlight"><pre>search_modifier:
+  {
+       IN NATURAL LANGUAGE MODE
+     | IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION
+     | IN BOOLEAN MODE
+     | WITH QUERY EXPANSION
+  }
+</pre></div>
+
+
+<p>Mysql支持全文索引和检索，有如下几个特征：</p>
+<ul>
+<li>全文索引类型是FULLTEXT</li>
+<li>全文索引只能被用在MyISAM引擎的表中（如果Mysql版本&gt;=5.6，全文索引也可以被用在InnoDB引擎的表中）</li>
+<li>全文索引只能被创建在CHAR、VARCHAR、TEXT类型的字段上</li>
+<li>全文索引可以在建表的时候设定，也可以在建表后进行更改</li>
+<li>如果一个表数据量很大，那么增加了全文索引，将会导致其加载数据变慢。</li>
+</ul>
+<h2>场景</h2>
+<p>全文检索使用MATCH(col_name)AGAINST(...)表达格式。MATCH括号中使用逗号分隔罗列需要被检索的字段列表。AGAINST ...</p>
+                <a class="readmore" href="/mysqlzhi-quan-wen-sou-suo-han-shu.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/centosan-zhuang-cloudera-cdhyumfang-shi.html" rel="bookmark"
+                           title="Permalink to Centos安装Cloudera CDH（YUM方式）">Centos安装Cloudera CDH（YUM方式）</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-24T00:00:00+08:00">
+                Published: 一 24 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>Centos安装Cloudera CDH（YUM方式）</h1>
+<h2>简介</h2>
+<p>Cloudera提供使用Yum方式或者下载RPM包进行安装，在接下来的环节，将采用Yum方式安装Cloudera。</p>
+<h2>编辑Yum的Repo</h2>
+<p>Cloudera的Yum安装地址：https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo?_ga=1.50190628.383672037.1471754216 。</p>
+<p>在/etc/yum.repos.d目录下新建文件“cloudera-cdh5.repo”</p>
+<div class="highlight"><pre>[root@e38f507299b0 yum.repos.d]#vi /etc/yum.repos.d/cloudera-cdh5.repo
+[cloudera-cdh5]
+# Packages for Cloudera&#39;s Distribution ...</pre></div>
+                <a class="readmore" href="/centosan-zhuang-cloudera-cdhyumfang-shi.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/dockeran-zhuang-centos.html" rel="bookmark"
+                           title="Permalink to Docker安装Centos">Docker安装Centos</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-24T00:00:00+08:00">
+                Published: 一 24 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>Docker安装Centos</h1>
 <h2>设置Docker国内镜像</h2>
 <p>镜像源地址可以通过阿里云申请一个：https://dev.aliyun.com/search.html ，也可以去网易镜像库寻找资源https://c.163.com/hub#/m/home/ 。</p>
 <h2>安装Centos</h2>
@@ -44,15 +291,145 @@
 
 <pre>
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-e38f507299b0        centos              "/bin/bash"         33 minutes ago      Up 1 ...</pre> </div><!-- /.entry-content -->
-        </article></li>
-</ol><!-- /#posts-list -->
-</section><!-- /#content -->
+e38f507299b0        centos              "/bin/bash"         33 minutes ago      Up 1 ...</pre>
+                <a class="readmore" href="/dockeran-zhuang-centos.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/li-jie-hibernatele-guan-suo.html" rel="bookmark"
+                           title="Permalink to 理解Hibernate乐观锁">理解Hibernate乐观锁</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-24T00:00:00+08:00">
+                Published: 一 24 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>理解Hibernate乐观锁</h1>
+<h2>介绍</h2>
+<p>Hibernate通过在持久化对象中增加Version属性(或者对某个属性增加@Version，采用Version属性会被Hibernate自动当做版本管理属性)来提供一套乐观锁方案，Version属性完全由Hibernate管理，开发者无需关心，只需要在你的代码中持久化类里增加一个数值型(Long，int，short)或者日期型(timestamp,calendars)的Version字段即可
+。</p>
+<h2>Version与事务</h2>
+<p>这里采用数值型的Version来说明Hibernate如果使用Version属性来实现乐观锁与事务。Version属性都是由Hibernate自动管理，当Hibernate需要创建一个事务来更新持久化对象时，会取出本次事务中最新一次查询出的持久化对象中的Version属性，来比对当前数据库中的Version属性，如果一致，则执行事务提交，一旦发现不一致的情况，将会回滚事务，这就是Hibernate通过Version属性实现的乐观锁。如果更新成功后，Hibernate会自动增加Version属性值。</p>
+<h2>Hibernate自我管理Version VS DB自我管理</h2>
+<p>当然有些DBA喜欢使用数据库而不是Hibernate完成乐观锁策略，
+Hibernate允许DB接收Version的管理，只需要在Version属性上配置generated=”always”（当然要注意，并不是所有数据库都支持管理Version）</p>
+<div class="highlight"><pre><span class="p">&lt;</span><span class="nt">hibernate-mapping</span> <span class="na">package</span><span class="o">=</span><span class="s">”com.ffw.entity”</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nt">class</span> <span class="na">name</span><span class="o">=</span><span class="s">”User”</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">id</span> <span class="na">name</span><span class="o">=</span><span class="s">”id ...</span></pre></div>
+                <a class="readmore" href="/li-jie-hibernatele-guan-suo.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/springshi-wu-de-chuan-bo-xing-yu-ge-chi-xing.html" rel="bookmark"
+                           title="Permalink to Spring事务的传播性与隔离性">Spring事务的传播性与隔离性</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-21T00:00:00+08:00">
+                Published: 五 21 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>Spring事务的传播性与隔离性</h1>
+<h2>简介</h2>
+<p>事务的传播性：事务在系统层面的控制范围。</p>
+<p>事务的隔离性：事务在数据库层面的读写控制范围。</p>
+<h2>传播性</h2>
+<p>事务传播性分为7种等级：</p>
+<div class="highlight"><pre>1.  PROPAGATION_REQUIRED 
+    如果当前没有事务，就新建一个事务，如果当前有事务，就加入当前事务，成为其中一部分，commit和rollback与调用者一起。这是最常见也是默认的选择，就比如你的方法用注解法加了@Transactional，不设置其他，就采用的是这种传播方式。
+2.  PROPAGATION_SUPPORTS
+    支持当前事务，如果当前没有事务，就以非事务方式执行。 
+3.  PROPAGATION_MANDATORY
+    支持当前事务，如果当前没有事务，就抛出异常。 
+4.  PROPAGATION_REQUIRES_NEW
+    新建一个事务，如果当前存在事务，把当前事务挂起；也就是说如果你是被调用方法，使用这种，就是一个独立的事务，调用你的外层事务commit和rollback与你无关，你的commit和rollback也与外层事务无关，即使你的方法抛出运行期异常(就是继承了RuntimeException的类)。 
+5.  PROPAGATION_NOT_SUPPORTED
+    以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。 
+6.  PROPAGATION_NEVER ...</pre></div>
+                <a class="readmore" href="/springshi-wu-de-chuan-bo-xing-yu-ge-chi-xing.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/monty-hallmeng-di-da-ting-nan-ti-gai-lu-qu-wen.html" rel="bookmark"
+                           title="Permalink to Monty Hall(蒙蒂大厅难题)-概率趣闻">Monty Hall(蒙蒂大厅难题)-概率趣闻</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-08-12T00:00:00+08:00">
+                Published: 五 12 八月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->                <h1>Monty Hall(蒙蒂大厅难题)-概率趣闻</h1>
+<p>蒙蒂大厅游戏的答案是如此有悖常理，以至于好多人都无法接受，好吧，我也是其中之一，~_~</p>
+<p>蒙蒂大厅游戏</p>
+<ul>
+<li>蒙蒂向你示意三个关闭的门，然后告诉你每个门有一个奖品：一个奖品是一辆车，另外两个是像花生酱和假指甲这样不值钱的奖品，奖品随机配置。</li>
+<li>游戏的目的是要猜哪个门后面有车，如果猜对了就可以拿走汽车。</li>
+<li>你先挑选一扇门，我们姑且称之为门A，其他两个称为门B和门C。</li>
+<li>在打开你选中的门之前，为了增加悬念，蒙蒂会先打开B或C中一个没有车的门来增加悬念（如果汽车实际上就是在A门背后，那么蒙蒂打开门B或门C都是安全的，所以他们可以随意选择一个）。</li>
+<li>然后蒙蒂给你一个选择，坚持最初的选择还是换到剩下的未打开的门上。</li>
+</ul>
+<p>问题是：是否该坚持还是换？是否有区别？</p>
+<p>从直觉上看，这似乎没有区别，还是剩下两个门的选择，应该是1/2的概率，也就是换不换都没有什么区别。</p>
+<p>但事实上却是错的，如果你坚持选A门的话，那么概率只有1/3，如果换成另外一个门，那么有2/3的概率，对，你没有听错，换了后，命中概率更高了。</p>
+<p>为什么会这样呢？（关于条件概率常识需要知道 ...</p>
+                <a class="readmore" href="/monty-hallmeng-di-da-ting-nan-ti-gai-lu-qu-wen.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+                </ol><!-- /#posts-list -->
+                </section><!-- /#content -->
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
         <footer id="contentinfo" class="body">
                 <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>,
-                which takes great advantage of <a href="http://python.org">Python</a>.
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
                 </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
         </footer><!-- /#contentinfo -->
+
 </body>
 </html>

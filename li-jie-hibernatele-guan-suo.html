@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+        <meta charset="utf-8" />
+        <title>理解Hibernate乐观锁</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">FFW Blog </a></h1>
+                <nav><ul>
+                    <li class="active"><a href="/category/misc.html">misc</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/li-jie-hibernatele-guan-suo.html" rel="bookmark"
+           title="Permalink to 理解Hibernate乐观锁">理解Hibernate乐观锁</a></h1>
+    </header>
+
+    <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2016-10-24T00:00:00+08:00">
+                Published: 一 24 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info -->      <h1>理解Hibernate乐观锁</h1>
+<h2>介绍</h2>
+<p>Hibernate通过在持久化对象中增加Version属性(或者对某个属性增加@Version，采用Version属性会被Hibernate自动当做版本管理属性)来提供一套乐观锁方案，Version属性完全由Hibernate管理，开发者无需关心，只需要在你的代码中持久化类里增加一个数值型(Long，int，short)或者日期型(timestamp,calendars)的Version字段即可
+。</p>
+<h2>Version与事务</h2>
+<p>这里采用数值型的Version来说明Hibernate如果使用Version属性来实现乐观锁与事务。Version属性都是由Hibernate自动管理，当Hibernate需要创建一个事务来更新持久化对象时，会取出本次事务中最新一次查询出的持久化对象中的Version属性，来比对当前数据库中的Version属性，如果一致，则执行事务提交，一旦发现不一致的情况，将会回滚事务，这就是Hibernate通过Version属性实现的乐观锁。如果更新成功后，Hibernate会自动增加Version属性值。</p>
+<h2>Hibernate自我管理Version VS DB自我管理</h2>
+<p>当然有些DBA喜欢使用数据库而不是Hibernate完成乐观锁策略，
+Hibernate允许DB接收Version的管理，只需要在Version属性上配置generated=”always”（当然要注意，并不是所有数据库都支持管理Version）</p>
+<div class="highlight"><pre><span class="p">&lt;</span><span class="nt">hibernate-mapping</span> <span class="na">package</span><span class="o">=</span><span class="s">”com.ffw.entity”</span><span class="p">&gt;</span> 
+  <span class="p">&lt;</span><span class="nt">class</span> <span class="na">name</span><span class="o">=</span><span class="s">”User”</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">id</span> <span class="na">name</span><span class="o">=</span><span class="s">”id”</span><span class="p">&gt;</span> 
+       <span class="p">&lt;</span><span class="nt">generator</span> <span class="na">class</span><span class="o">=</span><span class="s">”native”</span> <span class="p">/&gt;</span> 
+    <span class="p">&lt;/</span><span class="nt">id</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">version</span> <span class="na">name</span><span class="o">=</span><span class="s">”version”</span> <span class="na">type</span><span class="o">=</span><span class="s">”long”</span> <span class="na">generated</span><span class="o">=</span><span class="s">”always”/</span><span class="p">&gt;</span> 
+    <span class="p">&lt;</span><span class="nt">property</span> <span class="na">name</span><span class="o">=</span><span class="s">”name”</span> <span class="na">not-null</span><span class="o">=</span><span class="s">”true”</span> <span class="p">/&gt;</span> 
+  <span class="p">&lt;/</span><span class="nt">class</span><span class="p">&gt;</span> 
+<span class="p">&lt;/</span><span class="nt">hibernate-mapping</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>这么做后，当更新或者插入一条新纪录后，Hibernate需要额外的SQL来获取Version属性值，当然使用这种策略也可能存在一定风险，会出现更新或者插入记录后，额外的SQL无法查询出最新的Version变更信息结果。</p>
+<h2>数值型Version VS 日期型Version</h2>
+<p>数值型的Version
+（1）好处：不需要保证多台服务器的时间同步问题。
+（2）缺点：无法记录版本变更的时间信息，这种信息有时在一些特殊场景非常有用。</p>
+<p>日期型Version
+（1）好处：可以记录版本变更的时间，这种信息在一些场景有非常重要的价值。
+（2）缺点：如果多台服务器上时间不同步，将会导致乐观锁失败；又或者是时间精度不足，而此时并发量过高，同一毫秒数中有多个事务，导致事务失败。</p>
+<h2>不使用Version启动Hibernate乐观锁机制</h2>
+<p>当然你也可以不使用Version属性来运作乐观锁策略，有另外两种方案同样可以实现乐观锁。
+第一种：使用该表中的所有属性，通过设置optimistic-lock=”all” 来启动所有属性比对，确认当前记录版本。
+第二种：使用上一次更新的属性来比对记录的版本，设置optimistic-lock=”dirty”。</p>
+<h2>参考资料</h2>
+<p>[Versioning &amp; Optimistic Locking in Hibernate] https://www.intertech.com/Blog/versioning-optimistic-locking-in-hibernate/</p>
+<p>[Chapter 5. Locking] http://docs.jboss.org/hibernate/orm/4.0/devguide/en-US/html/ch05.html</p>
+<p>[Chapter 11. Transactions and Concurrency] http://docs.jboss.org/hibernate/core/3.3/reference/en/html/transactions.html</p>
+    </div><!-- /.entry-content -->
+
+  </article>
+</section>
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
