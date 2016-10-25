@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+        <meta charset="utf-8" />
+        <title>FFW Blog</title>
+        <link rel="stylesheet" href="/theme/css/main.css" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="/">FFW Blog </a></h1>
+                <nav><ul>
+                    <li><a href="/category/misc.html">misc</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="/dockeran-zhuang-centos.html">Docker安装Centos</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2016-10-25T00:00:00+08:00">
+                Published: 二 25 十月 2016
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/henrybit.html">henrybit</a>
+        </address>
+<p>In <a href="/category/misc.html">misc</a>.</p>
+
+</footer><!-- /.post-info --><h1>Docker安装Centos</h1>
+<h2>设置Docker国内镜像</h2>
+<p>镜像源地址可以通过阿里云申请一个：https://dev.aliyun.com/search.html ，也可以去网易镜像库寻找资源https://c.163.com/hub#/m/home/ 。</p>
+<h2>安装Centos</h2>
+<div class="highlight"><pre>docker pull centos
+</pre></div>
+
+
+<h2>启动Centos</h2>
+<div class="highlight"><pre>docker run -d -i -t centos /bin/bash
+</pre></div>
+
+
+<h2>进入Centos</h2>
+<p>查看运行后的容器ID</p>
+<div class="highlight"><pre>docker ps
+</pre></div>
+
+
+<pre>
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+e38f507299b0        centos              "/bin/bash"         33 minutes ago      Up 1 seconds                            naughty_curie
+</pre>
+
+<p>找到容器ID，通过命令</p>
+<div class="highlight"><pre>docker attach e38f507299b0
+</pre></div>
+
+
+<p>进入容器中，这就是centos的一个系统在docker中运行</p>
+<pre>
+[root@e38f507299b0 /]# ifconfig
+bash: ifconfig: command not found
+</pre>
+
+<h2>安装Centos中ifconfig命令</h2>
+<p>竟然没有ifconfig命令，接着使用你会发现ssh也没有，还有我常用的命令which，来吧，我们开始安装这些组件；这已经是一个centos系统了，那么就让我们用yum开始安装吧。</p>
+<div class="highlight"><pre>yum install net-tools.x86_64
+</pre></div>
+
+
+<h2>安装Which命令</h2>
+<div class="highlight"><pre>yum install which
+</pre></div>
+
+
+<h2>安装SSH</h2>
+<p>服务端SSH服务</p>
+<div class="highlight"><pre>yum install openssh-server  ##安装SSH服务
+sshd -D &amp;  ##启动SSH服务
+</pre></div>
+
+
+<p>SSH客户端工具</p>
+<div class="highlight"><pre>yum install openssh-clients
+</pre></div>                </article>
+            </aside><!-- /#featured -->
+        <section id="extras" class="body">
+                <div class="blogroll">
+                        <h2>blogroll</h2>
+                        <ul>
+                            <li><a href="http://getpelican.com/">Pelican</a></li>
+                            <li><a href="http://python.org/">Python.org</a></li>
+                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                            <li><a href="#">You can modify those links in your config file</a></li>
+                        </ul>
+                </div><!-- /.blogroll -->
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+
+                            <li><a href="#">You can add links in your config file</a></li>
+                            <li><a href="#">Another social link</a></li>
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
